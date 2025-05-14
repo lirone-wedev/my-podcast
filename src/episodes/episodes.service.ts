@@ -1,22 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
-interface Episode {
-    id: number;
-    title: string;
-    description: string;
-}
+import type { Episode, CreateEpisodeDto } from '../types';
 
 @Injectable()
 export class EpisodesService {
     private episodes: Episode[] = []
 
-    async findAll(sort: 'asc' | 'desc' = 'asc'): Promise<Episode[]> {
+    async findAll(sort: 'asc' | 'desc' = 'asc', limit: number): Promise<Episode[]> {
         const sortAsc = (a: Episode, b: Episode) => a.id - b.id;
         const sortDesc = (a: Episode, b: Episode) => b.id - a.id;
 
         return sort === 'asc'
-            ? this.episodes.sort(sortAsc)
-            : this.episodes.sort(sortDesc);
+            ? this.episodes.sort(sortAsc).slice(0, limit)
+            : this.episodes.sort(sortDesc).slice(0, limit);
     }
 
     async findFeatured(): Promise<Episode> {
@@ -24,9 +20,14 @@ export class EpisodesService {
     }
 
     async findOne(id: number): Promise<Episode> {
+        console.log(id);
+        
         return this.episodes.find(episode => episode.id === id);
     }
 
-    // async create(episode: Episode): Promise<Episode> {
-    //     const newEpisode = { ...createEpisodeDto, id: this.episodes.length + 1 };
+    async create(createEpisodeDto: CreateEpisodeDto): Promise<Episode> {
+        const newEpisode = { ...createEpisodeDto, id: this.episodes.length + 1 };
+        this.episodes.push(newEpisode);
+        return newEpisode;
+    }
 }
